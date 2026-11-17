@@ -1,11 +1,11 @@
-from cliffwalking import CliffWalkingEnv
+import gymnasium as gym
 import ray
 from ray import tune
-from ray.rllib.agents.ppo import PPOTrainer
-from ray.rllib.agents.dqn import DQNTrainer
+from ray.rllib.algorithms.ppo import PPO
+from ray.rllib.algorithms.dqn import DQN
 from ray.rllib.models import ModelCatalog
 from ray.tune import run_experiments
-from ray.tune.integration.wandb import WandbLoggerCallback
+# from ray.tune.integration.wandb import WandbLoggerCallback
 from ray.tune.registry import register_env
 import torch
 from torch.autograd import Variable
@@ -22,7 +22,7 @@ def test(model_path, num_episodes=10, mode='PPO'):
 
     ray.init()
     def env_creator(_):
-        env = CliffWalkingEnv()
+        env = gym.make('CliffWalking-v1', render_mode='rgb_array')
         return env
     
     register_env('CliffWalking', env_creator)
@@ -37,9 +37,9 @@ def test(model_path, num_episodes=10, mode='PPO'):
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='CliffWalking')
+        agent = PPO(config=config, env='CliffWalking-v1')
     else:
-        agent = DQNTrainer(config=config, env='CliffWalking')
+        agent = DQN(config=config, env='CliffWalking-v1')
     agent.restore(model_path)
     policy = agent.get_policy()
     model = policy.model
@@ -105,7 +105,7 @@ def test(model_path, num_episodes=10, mode='PPO'):
 def calculate_fidelity(model_path, all_clusters, data, num_episodes=25, topin=False, apg_act=None, mode='PPO'):
     #ray.init()
     def env_creator(_):
-        env = CliffWalkingEnv()
+        env = gym.make('CliffWalking-v1', render_mode='rgb_array')
         return env
     
     register_env('CliffWalking', env_creator)
@@ -120,9 +120,9 @@ def calculate_fidelity(model_path, all_clusters, data, num_episodes=25, topin=Fa
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='CliffWalking')
+        agent = PPO(config=config, env='CliffWalking-v1')
     else:
-        agent = DQNTrainer(config=config, env='CliffWalking')
+        agent = DQN(config=config, env='CliffWalking-v1')
 
     agent.restore(model_path)
     policy = agent.get_policy()
@@ -220,7 +220,7 @@ def calculate_fidelity(model_path, all_clusters, data, num_episodes=25, topin=Fa
 def run_abstract_episode(all_clusters, data, num_episodes=10):
     #ray.init()
     def env_creator(_):
-        env = CliffWalkingEnv()
+        env = gym.make('CliffWalking-v1', render_mode='rgb_array')
         return env
     
 

@@ -1,11 +1,11 @@
-from ll_env import LunarLander
+import gymnasium as gym
 import ray
 from ray import tune
-from ray.rllib.agents.ppo import PPOTrainer
-from ray.rllib.agents.dqn import DQNTrainer
+from ray.rllib.algorithms.ppo import PPO
+from ray.rllib.algorithms.dqn import DQN
 from ray.rllib.models import ModelCatalog
 from ray.tune import run_experiments
-from ray.tune.integration.wandb import WandbLoggerCallback
+#from ray.tune.integration.wandb import WandbLoggerCallback
 from ray.tune.registry import register_env
 import torch
 from torch.autograd import Variable
@@ -17,7 +17,7 @@ def test(model_path, num_episodes=10, mode='PPO'):
 
     ray.init()
     def env_creator(_):
-        env = LunarLander()
+        env = gym.make('LunarLander-v3')
         return env
     
     register_env('LunarLander', env_creator)
@@ -33,9 +33,9 @@ def test(model_path, num_episodes=10, mode='PPO'):
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='LunarLander')
+        agent = PPO(config=config, env='LunarLander')
     else:
-        agent = DQNTrainer(config=config, env='LunarLander')
+        agent = DQN(config=config, env='LunarLander')
 
     agent.restore(model_path)
     policy = agent.get_policy()
@@ -96,7 +96,7 @@ def test(model_path, num_episodes=10, mode='PPO'):
 def calculate_fidelity(model_path, all_clusters, data, num_episodes=5, topin=False, apg_act=None, mode='PPO'):
     #ray.init()
     def env_creator(_):
-        env = LunarLander()
+        env = gym.make('LunarLander-v3')
         return env
     
     register_env('LunarLander', env_creator)
@@ -111,9 +111,9 @@ def calculate_fidelity(model_path, all_clusters, data, num_episodes=5, topin=Fal
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='LunarLander')
+        agent = PPO(config=config, env='LunarLander')
     else:
-        agent = DQNTrainer(config=config, env='LunarLander')
+        agent = DQN(config=config, env='LunarLander')
     agent.restore(model_path)
     policy = agent.get_policy()
     model = policy.model
@@ -202,7 +202,7 @@ def calculate_fidelity(model_path, all_clusters, data, num_episodes=5, topin=Fal
 def run_abstract_episode(all_clusters, data, num_episodes=3):
 
     def env_creator(_):
-        env = MountainCarEnv()
+        env = gym.make('LunarLander-v3')
         return env
 
     env = env_creator(None)
