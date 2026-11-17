@@ -1,11 +1,11 @@
-from env import CartPoleEnv
+import gymnasium as gym
 import ray
 from ray import tune
-from ray.rllib.agents.ppo import PPOTrainer
-from ray.rllib.agents.dqn import DQNTrainer
+from ray.rllib.algorithms.ppo import PPO
+from ray.rllib.algorithms.dqn import DQN
 from ray.rllib.models import ModelCatalog
 from ray.tune import run_experiments
-from ray.tune.integration.wandb import WandbLoggerCallback
+#from ray.tune.integration.wandb import WandbLoggerCallback
 from ray.tune.registry import register_env
 import torch
 from torch.autograd import Variable
@@ -17,7 +17,7 @@ def test(model_path, num_episodes=10, mode='PPO'):
 
     ray.init()
     def env_creator(_):
-        env = CartPoleEnv()
+        env = gym.make("CartPole-v1", render_mode="rgb_array")
         return env
     
     register_env('Cartpole', env_creator)
@@ -33,9 +33,9 @@ def test(model_path, num_episodes=10, mode='PPO'):
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='Cartpole')
+        agent = PPO(config=config, env='Cartpole')
     else:
-        agent = DQNTrainer(config=config, env='Cartpole')
+        agent = DQN(config=config, env='Cartpole')
     agent.restore(model_path)
     policy = agent.get_policy()
     model = policy.model
@@ -112,9 +112,9 @@ def calculate_fidelity(model_path, all_clusters, data, num_episodes=10, topin=Fa
           "framework": "torch"
           }
     if mode == 'PPO':
-        agent = PPOTrainer(config=config, env='Cartpole')
+        agent = PPO(config=config, env='Cartpole')
     else:
-        agent = DQNTrainer(config=config, env='Cartpole')
+        agent = DQN(config=config, env='Cartpole')
     agent.restore(model_path)
     policy = agent.get_policy()
     model = policy.model
